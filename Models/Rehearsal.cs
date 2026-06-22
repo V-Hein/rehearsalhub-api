@@ -12,6 +12,9 @@ public class Rehearsal
     public int PlaceId { get; set; } 
     public Place Place { get; set; } = null!;
 
+    public int RehearsalStatusId { get; set; }
+    public RehearsalStatus RehearsalStatus { get; set; } = null!;
+
     public DateTime Date { get; set; }
     public string? Note { get; set; }
     public int? TimeSeconds { get; set; } 

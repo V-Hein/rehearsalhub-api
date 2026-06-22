@@ -25,6 +25,12 @@ public class RehearsalConfiguration : IEntityTypeConfiguration<Rehearsal>
             .OnDelete(DeleteBehavior.Restrict);
 
         builder
+            .HasOne(r => r.RehearsalStatus)
+            .WithMany(rs => rs.Rehearsals)
+            .HasForeignKey(r => r.RehearsalStatusId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder
             .HasIndex(r => r.Name)
             .IsUnique();
     }

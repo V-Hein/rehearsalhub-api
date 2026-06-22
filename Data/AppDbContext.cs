@@ -22,6 +22,7 @@ public class AppDbContext : DbContext
     public DbSet<BandMember> BandMembers => Set<BandMember>();
     public DbSet<Setlist> Setlists => Set<Setlist>();
     public DbSet<Place> Places => Set<Place>();
+    public DbSet<RehearsalStatus> RehearsalStatuses => Set<RehearsalStatus>();
     public DbSet<Rehearsal> Rehearsals => Set<Rehearsal>();
     public DbSet<Tab> Tabs => Set<Tab>();
     public DbSet<RehearsalMemberStatus> RehearsalMemberStatuses => Set<RehearsalMemberStatus>();
