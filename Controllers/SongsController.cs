@@ -23,7 +23,7 @@ public class SongsController : ControllerBase
             .Select(s => new SongDto(
                 s.Id,
                 s.Name,
-                s.Band,
+                s.Band.Name,
                 $"{s.User.FirstName} {s.User.LastName}",
                 s.Tuning.Name,
                 s.TimeSeconds.HasValue
@@ -48,7 +48,7 @@ public class SongsController : ControllerBase
             .Select(s => new SongDto(
                 s.Id,
                 s.Name,
-                s.Band,
+                s.Band.Name,
                 $"{s.User.FirstName} {s.User.LastName}",
                 s.Tuning.Name,
                 TimeSpan.FromSeconds(Convert.ToInt32(s.TimeSeconds)),
@@ -67,7 +67,7 @@ public class SongsController : ControllerBase
         var song = new Song
         {
             Name = dto.Name,
-            Band = dto.Band,
+            BandId = dto.BandId,
             UserId = dto.UserId,
             TuningId = dto.TuningId,
             TimeSeconds = dto.TimeSeconds,
