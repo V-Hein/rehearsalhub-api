@@ -23,5 +23,11 @@ public class SongConfiguration : IEntityTypeConfiguration<Song>
             .WithMany(t => t.Songs)
             .HasForeignKey(s => s.TuningId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder
+            .HasOne(s => s.SongStatus)
+            .WithMany(ss => ss.Songs)
+            .HasForeignKey(s => s.SongStatusId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

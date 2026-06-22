@@ -12,6 +12,9 @@ public class Song
     public int TuningId { get; set; }
     public Tuning Tuning { get; set; } = null!;
 
+    public int SongStatusId { get; set; }
+    public SongStatus SongStatus { get; set; } = null!;
+
     public int? TimeSeconds { get; set; }
     public string? CoverImage { get; set; }
     
