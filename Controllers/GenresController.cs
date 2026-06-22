@@ -19,10 +19,12 @@ public class GenresController : ControllerBase
     public async Task<ActionResult<IEnumerable<Genre>>> GetAll()
     {
         var genres = await _db.Genres
+            .OrderBy(g => g.Id)
             .Select(g => new GenreDto(
                 g.Id,
                 g.Name
-            )).ToListAsync();
+            ))
+            .ToListAsync();
 
         if (genres == null)
             return NotFound();
