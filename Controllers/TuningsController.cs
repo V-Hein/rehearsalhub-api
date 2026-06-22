@@ -18,12 +18,10 @@ public class TuningsController : ControllerBase
     public async Task<ActionResult<IEnumerable<Tuning>>> GetAll()
     {
         var tunings = await _db.Tunings
-            .Include(t => t.Instrument)
             .Select(t => new TuningDto(
                 t.Id,
                 t.Name,
-                t.Notes,
-                t.Instrument.Name
+                t.Notes
             )).ToListAsync();
 
         return Ok(tunings);
@@ -34,12 +32,10 @@ public class TuningsController : ControllerBase
     {        
         var tuning = await _db.Tunings
             .Where(t => t.Id == id)
-            .Include(t => t.Instrument)
             .Select(t => new TuningDto(
                 t.Id,
                 t.Name,
-                t.Notes,
-                t.Instrument.Name
+                t.Notes
             )).FirstOrDefaultAsync();
 
         if (tuning == null)
@@ -55,7 +51,6 @@ public class TuningsController : ControllerBase
         {
             Name = dto.Name,
             Notes = dto.Notes,
-            InstrumentId = dto.InstrumentId
         };
 
         _db.Tunings.Add(tuning);
