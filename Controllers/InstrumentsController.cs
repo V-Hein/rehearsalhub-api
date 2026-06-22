@@ -1,4 +1,5 @@
 
+using System.Runtime.InteropServices.Marshalling;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -33,7 +34,7 @@ public class InstrumentsController : ControllerBase
         return Ok(instruments);
     }
 
-    [HttpGet("id")]
+    [HttpGet("{id}")]
     public async Task<ActionResult<Instrument>> GetById(int id)
     {
         var instrument = await _db.Instruments
