@@ -20,7 +20,13 @@ public class AppDbContext : DbContext
     public DbSet<BandGenre> BandGenres => Set<BandGenre>();
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<BandMember> BandMembers => Set<BandMember>();
-
+    public DbSet<Setlist> Setlists => Set<Setlist>();
+    public DbSet<Place> Places => Set<Place>();
+    public DbSet<Rehearsal> Rehearsals => Set<Rehearsal>();
+    public DbSet<Tab> Tabs => Set<Tab>();
+    public DbSet<RehearsalMemberStatus> RehearsalMemberStatuses => Set<RehearsalMemberStatus>();
+    public DbSet<RehearsalMember> RehearsalMembers => Set<RehearsalMember>();
+    public DbSet<InstrumentTuning> InstrumentTunings => Set<InstrumentTuning>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

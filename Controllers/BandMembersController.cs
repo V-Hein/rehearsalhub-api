@@ -21,6 +21,8 @@ public class BandMembersController : ControllerBase
         var members = await _db.BandMembers
             .Where(bm => bm.BandId == bandId)
             .Select(bm => new BandMemberDto(
+                bm.Id,
+                bm.BandId,
                 bm.UserId,
                 bm.User.FirstName + bm.User.LastName,
                 bm.Role.Name
@@ -32,12 +34,14 @@ public class BandMembersController : ControllerBase
         return Ok(members);
     }
 
-    [HttpGet("{userId}")]
-    public async Task<ActionResult<IEnumerable<BandMember>>> GetById(int bandId, int userId)
+    [HttpGet("{id}")]
+    public async Task<ActionResult<BandMember>> GetById(int bandId, int id)
     {
         var member = await _db.BandMembers
-            .Where(bm => bm.BandId == bandId && bm.UserId == userId)
+            .Where(bm => bm.BandId == bandId && bm.Id == id)
             .Select(bm => new BandMemberDto(
+                bm.Id,
+                bm.BandId,
                 bm.UserId,
                 bm.User.FirstName + bm.User.LastName,
                 bm.Role.Name
@@ -66,11 +70,13 @@ public class BandMembersController : ControllerBase
         var result = await _db.BandMembers
             .Where(bm => bm.BandId == bandId && bm.UserId == dto.UserId)
             .Select(bm => new BandMemberDto(
+                bm.Id,
+                bm.BandId,
                 bm.UserId,
                 bm.User.FirstName + bm.User.LastName,
                 bm.Role.Name
             )).FirstOrDefaultAsync();
         
-        return CreatedAtAction(nameof(GetById), new { bandId = member.BandId, userId = member.UserId }, result);
+        return CreatedAtAction(nameof(GetById), new { bandId = member.BandId, id = member.Id }, result);
     }
 }

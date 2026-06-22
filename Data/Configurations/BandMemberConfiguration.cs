@@ -8,21 +8,25 @@ public class BandMemberConfiguration : IEntityTypeConfiguration<BandMember>
     public void Configure(EntityTypeBuilder<BandMember> builder)
     {
         builder
-            .HasKey(bm => new { bm.BandId, bm.UserId });
-
-        builder
             .HasOne(bm => bm.Band)
             .WithMany(b => b.BandMembers)
-            .HasForeignKey(bm => bm.BandId);
+            .HasForeignKey(bm => bm.BandId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder
             .HasOne(bm => bm.User)
             .WithMany(u => u.BandMembers)
-            .HasForeignKey(bm => bm.UserId);
+            .HasForeignKey(bm => bm.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder
             .HasOne(bm => bm.Role)
             .WithMany(r => r.BandMembers)
-            .HasForeignKey(bm => bm.RoleId);
+            .HasForeignKey(bm => bm.RoleId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder
+            .HasIndex(bm => new { bm.BandId, bm.UserId })
+            .IsUnique();
     }
 }

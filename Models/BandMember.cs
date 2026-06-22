@@ -1,5 +1,6 @@
 public class BandMember
 {
+    public int Id { get; set; }
     public int BandId { get; set; }
     public Band Band { get; set; } = null!;
 
@@ -8,4 +9,6 @@ public class BandMember
 
     public int RoleId { get; set; }
     public Role Role { get; set; } = null!;
+
+    public List<RehearsalMember> RehearsalMembers { get; set; } = new();
 }

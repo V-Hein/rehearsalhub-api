@@ -1,7 +1,7 @@
 public record CreateSongDto
 (
     string Name,
-    string Band,
+    int BandId,
     int UserId,
     int TuningId,
     int? TimeSeconds,

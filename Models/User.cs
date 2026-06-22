@@ -11,4 +11,5 @@ public class User
 
     public List<Song> Songs { get; set; } = new();
     public List<BandMember> BandMembers { get; set; } = new();
+    public List<RehearsalMember> RehearsalMembers { get; set; } = new();
 }
