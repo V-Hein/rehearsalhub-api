@@ -48,7 +48,7 @@ public class RehearsalsController : ControllerBase
             SetlistId = dto.SetlistId,
             PlaceId = dto.PlaceId,
             RehearsalStatusId = dto.RehearsalStatusId,
-            Date = dto.Date,
+            Date = Convert.ToDateTime(dto.Date),
             TimeSeconds = dto.TimeSeconds,
             Note = dto.Note
         };
