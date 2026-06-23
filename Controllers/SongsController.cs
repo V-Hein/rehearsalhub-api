@@ -26,6 +26,7 @@ public class SongsController : ControllerBase
                 s.Band.Name,
                 $"{s.User.FirstName} {s.User.LastName}",
                 s.Tuning.Name,
+                s.SongStatus.Name,
                 s.TimeSeconds.HasValue
                     ? TimeSpan.FromSeconds(Convert.ToInt32(s.TimeSeconds))
                     : TimeSpan.Zero,
@@ -51,6 +52,7 @@ public class SongsController : ControllerBase
                 s.Band.Name,
                 $"{s.User.FirstName} {s.User.LastName}",
                 s.Tuning.Name,
+                s.SongStatus.Name,
                 TimeSpan.FromSeconds(Convert.ToInt32(s.TimeSeconds)),
                 s.CoverImage
             )).FirstOrDefaultAsync();
@@ -70,6 +72,7 @@ public class SongsController : ControllerBase
             BandId = dto.BandId,
             UserId = dto.UserId,
             TuningId = dto.TuningId,
+            SongStatusId = dto.SongStatusId,
             TimeSeconds = dto.TimeSeconds,
             CoverImage = dto.CoverImagePath
         };

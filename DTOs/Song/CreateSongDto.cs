@@ -4,6 +4,7 @@ public record CreateSongDto
     int BandId,
     int UserId,
     int TuningId,
+    int SongStatusId,
     int? TimeSeconds,
     string? CoverImagePath
 );
