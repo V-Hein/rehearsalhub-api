@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.SignalR.Protocol;
+
 public record RehearsalDto
 (
     int Id,
@@ -5,6 +7,7 @@ public record RehearsalDto
     string Band,
     string Setlist,
     string Place,
+    string RehearsalStatus,
     DateTime Date,
 
     TimeSpan? Time,

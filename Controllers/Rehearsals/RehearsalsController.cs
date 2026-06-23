@@ -47,6 +47,7 @@ public class RehearsalsController : ControllerBase
             BandId = dto.BandId,
             SetlistId = dto.SetlistId,
             PlaceId = dto.PlaceId,
+            RehearsalStatusId = dto.RehearsalStatusId,
             Date = dto.Date,
             TimeSeconds = dto.TimeSeconds,
             Note = dto.Note
@@ -69,6 +70,7 @@ public class RehearsalsController : ControllerBase
                 r.Band.Name,
                 r.Setlist.Name,
                 r.Place.Name,
+                r.RehearsalStatus.Name,
                 r.Date,
                 TimeSpan.FromSeconds(r.TimeSeconds ?? 0),
                 r.Note

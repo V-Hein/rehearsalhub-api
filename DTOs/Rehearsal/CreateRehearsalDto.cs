@@ -4,6 +4,7 @@ public record CreateRehearsalDto
     int BandId,
     int SetlistId,
     int PlaceId,
+    int RehearsalStatusId,
     DateTime Date,
 
     int? TimeSeconds,
