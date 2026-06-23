@@ -16,10 +16,10 @@ public class RolesController : ControllerBase
 
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Role>>> GetAll()
+    public async Task<ActionResult<IEnumerable<BandRole>>> GetAll()
     {
-        var roles = await _db.Roles
-            .Select(r => new RoleDto(
+        var roles = await _db.BandRoles
+            .Select(r => new BandRoleDto(
                 r.Id,
                 r.Name
             )).ToListAsync();
@@ -31,11 +31,11 @@ public class RolesController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Role>> GetById(int id)
+    public async Task<ActionResult<BandRole>> GetById(int id)
     {
-        var role = await _db.Roles
+        var role = await _db.BandRoles
             .Where(r => r.Id == id)
-            .Select(r => new RoleDto(
+            .Select(r => new BandRoleDto(
                 r.Id,
                 r.Name
             )).FirstOrDefaultAsync();
@@ -47,20 +47,20 @@ public class RolesController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Role>> Create(CreateRoleDto dto)
+    public async Task<ActionResult<BandRole>> Create(CreateBandRoleDto dto)
     {
-        var role = new Role
+        var role = new BandRole
         {
             Name = dto.Name
         };
 
-        _db.Roles.Add(role);
+        _db.BandRoles.Add(role);
 
         await _db.SaveChangesAsync();
 
-        var result = await _db.Roles
+        var result = await _db.BandRoles
             .Where(r => r.Id == role.Id)
-            .Select(r => new RoleDto(
+            .Select(r => new BandRoleDto(
                 r.Id,
                 r.Name
             )).FirstOrDefaultAsync();
