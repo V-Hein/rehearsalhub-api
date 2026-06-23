@@ -3,6 +3,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ValueGeneration.Internal;
+using Server.Migrations;
 
 [ApiController]
 [Route("api/rehearsals")]
@@ -47,14 +48,27 @@ public class RehearsalsController : ControllerBase
             BandId = dto.BandId,
             SetlistId = dto.SetlistId,
             PlaceId = dto.PlaceId,
-            RehearsalStatusId = dto.RehearsalStatusId,
+            RehearsalStatusId = dto.StatusId,
             Date = Convert.ToDateTime(dto.Date),
             TimeSeconds = dto.TimeSeconds,
             Note = dto.Note
         };
 
-        _db.Rehearsals.Add(rehearsal);
+        var songIds = await _db.SetlistSongs
+            .Where(ss => ss.SetlistId == rehearsal.SetlistId)
+            .Select(ss => ss.SongId)
+            .ToListAsync();
+        
+        foreach (var songId in songIds)
+        {
+            rehearsal.RehearsalSongs.Add(new RehearsalSong
+            {
+                RehearsalId = rehearsal.Id,
+                SongId = songId
+            });
+        }
 
+        _db.Rehearsals.Add(rehearsal);
         await _db.SaveChangesAsync();
 
         var result = await GetRehearsal(rehearsal.Id);
@@ -72,8 +86,15 @@ public class RehearsalsController : ControllerBase
                 r.Place.Name,
                 r.RehearsalStatus.Name,
                 r.Date,
-                TimeSpan.FromSeconds(r.TimeSeconds ?? 0),
-                r.Note
+                r.TimeSeconds ?? 0,
+                r.Note,
+                r.RehearsalSongs
+                    .Select(rs => new RehearsalSongListItemDto(
+                        rs.Song.Id,
+                        rs.Song.Name,
+                        rs.Song.TimeSeconds,
+                        rs.Rating != null ? rs.Rating.Name : "Not Stated"
+                    )).ToList()
             ));
     }
 

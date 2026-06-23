@@ -1,0 +1,7 @@
+public class Rating
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = null!; 
+
+    public List<RehearsalSong> RehearsalSongs { get; set; } = new();
+}

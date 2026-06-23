@@ -10,6 +10,8 @@ public record RehearsalDto
     string RehearsalStatus,
     DateTime Date,
 
-    TimeSpan? Time,
-    string? Note
+    int? TimeSeconds,
+    string? Note,
+
+    List<RehearsalSongListItemDto> Songs
 );

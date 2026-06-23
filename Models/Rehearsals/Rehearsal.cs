@@ -18,5 +18,7 @@ public class Rehearsal
     public DateTime Date { get; set; }
     public string? Note { get; set; }
     public int? TimeSeconds { get; set; } 
+    
     public List<RehearsalMember> RehearsalMembers { get; set; } = new();
+    public List<RehearsalSong> RehearsalSongs { get; set; } = new();
 }

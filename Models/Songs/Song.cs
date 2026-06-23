@@ -20,4 +20,5 @@ public class Song
     
     public List<Tab> Tabs { get; set; } = new();
     public List<SetlistSong> SetlistSongs { get; set; } = new();
+    public List<RehearsalSong> RehearsalSongs { get; set; } = new();
 }

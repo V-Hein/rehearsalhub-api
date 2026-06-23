@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260623174641_MakeSongRatingNullable")]
+    partial class MakeSongRatingNullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -38,7 +41,7 @@ namespace Server.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Bands", (string)null);
+                    b.ToTable("Bands");
                 });
 
             modelBuilder.Entity("BandGenre", b =>
@@ -53,7 +56,7 @@ namespace Server.Migrations
 
                     b.HasIndex("GenreId");
 
-                    b.ToTable("BandGenres", (string)null);
+                    b.ToTable("BandGenres");
                 });
 
             modelBuilder.Entity("BandMember", b =>
@@ -82,7 +85,7 @@ namespace Server.Migrations
                     b.HasIndex("BandId", "UserId")
                         .IsUnique();
 
-                    b.ToTable("BandMembers", (string)null);
+                    b.ToTable("BandMembers");
                 });
 
             modelBuilder.Entity("Genre", b =>
@@ -102,7 +105,7 @@ namespace Server.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Genres", (string)null);
+                    b.ToTable("Genres");
                 });
 
             modelBuilder.Entity("Instrument", b =>
@@ -127,7 +130,7 @@ namespace Server.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Instruments", (string)null);
+                    b.ToTable("Instruments");
                 });
 
             modelBuilder.Entity("InstrumentTuning", b =>
@@ -142,7 +145,7 @@ namespace Server.Migrations
 
                     b.HasIndex("TuningId");
 
-                    b.ToTable("InstrumentTunings", (string)null);
+                    b.ToTable("InstrumentTunings");
                 });
 
             modelBuilder.Entity("InstrumentType", b =>
@@ -162,7 +165,7 @@ namespace Server.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("InstrumentTypes", (string)null);
+                    b.ToTable("InstrumentTypes");
                 });
 
             modelBuilder.Entity("Place", b =>
@@ -186,7 +189,7 @@ namespace Server.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Places", (string)null);
+                    b.ToTable("Places");
                 });
 
             modelBuilder.Entity("Rating", b =>
@@ -206,7 +209,7 @@ namespace Server.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Ratings", (string)null);
+                    b.ToTable("Ratings");
                 });
 
             modelBuilder.Entity("Rehearsal", b =>
@@ -255,7 +258,7 @@ namespace Server.Migrations
 
                     b.HasIndex("SetlistId");
 
-                    b.ToTable("Rehearsals", (string)null);
+                    b.ToTable("Rehearsals");
                 });
 
             modelBuilder.Entity("RehearsalMember", b =>
@@ -285,7 +288,7 @@ namespace Server.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("RehearsalMembers", (string)null);
+                    b.ToTable("RehearsalMembers");
                 });
 
             modelBuilder.Entity("RehearsalMemberStatus", b =>
@@ -305,7 +308,7 @@ namespace Server.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("RehearsalMemberStatuses", (string)null);
+                    b.ToTable("RehearsalMemberStatuses");
                 });
 
             modelBuilder.Entity("RehearsalSong", b =>
@@ -325,7 +328,7 @@ namespace Server.Migrations
 
                     b.HasIndex("SongId");
 
-                    b.ToTable("RehearsalSongs", (string)null);
+                    b.ToTable("RehearsalSongs");
                 });
 
             modelBuilder.Entity("RehearsalStatus", b =>
@@ -345,7 +348,7 @@ namespace Server.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("RehearsalStatuses", (string)null);
+                    b.ToTable("RehearsalStatuses");
                 });
 
             modelBuilder.Entity("Role", b =>
@@ -365,7 +368,7 @@ namespace Server.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Roles", (string)null);
+                    b.ToTable("Roles");
                 });
 
             modelBuilder.Entity("Setlist", b =>
@@ -390,7 +393,7 @@ namespace Server.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Setlists", (string)null);
+                    b.ToTable("Setlists");
                 });
 
             modelBuilder.Entity("SetlistSong", b =>
@@ -405,7 +408,7 @@ namespace Server.Migrations
 
                     b.HasIndex("SongId");
 
-                    b.ToTable("SetlistSongs", (string)null);
+                    b.ToTable("SetlistSongs");
                 });
 
             modelBuilder.Entity("Song", b =>
@@ -448,7 +451,7 @@ namespace Server.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Songs", (string)null);
+                    b.ToTable("Songs");
                 });
 
             modelBuilder.Entity("SongStatus", b =>
@@ -468,7 +471,7 @@ namespace Server.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("SongStatuses", (string)null);
+                    b.ToTable("SongStatuses");
                 });
 
             modelBuilder.Entity("Tab", b =>
@@ -507,7 +510,7 @@ namespace Server.Migrations
 
                     b.HasIndex("TuningId");
 
-                    b.ToTable("Tabs", (string)null);
+                    b.ToTable("Tabs");
                 });
 
             modelBuilder.Entity("Tuning", b =>
@@ -531,7 +534,7 @@ namespace Server.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Tunings", (string)null);
+                    b.ToTable("Tunings");
                 });
 
             modelBuilder.Entity("User", b =>
@@ -569,7 +572,7 @@ namespace Server.Migrations
                         .IsUnique()
                         .HasFilter("[Phone] IS NOT NULL");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("BandGenre", b =>
