@@ -27,9 +27,7 @@ public class SongsController : ControllerBase
                 $"{s.User.FirstName} {s.User.LastName}",
                 s.Tuning.Name,
                 s.SongStatus.Name,
-                s.TimeSeconds.HasValue
-                    ? TimeSpan.FromSeconds(Convert.ToInt32(s.TimeSeconds))
-                    : TimeSpan.Zero,
+                s.TimeSeconds,
                 s.CoverImage
             )).ToListAsync();
 
@@ -53,7 +51,7 @@ public class SongsController : ControllerBase
                 $"{s.User.FirstName} {s.User.LastName}",
                 s.Tuning.Name,
                 s.SongStatus.Name,
-                TimeSpan.FromSeconds(Convert.ToInt32(s.TimeSeconds)),
+                s.TimeSeconds,
                 s.CoverImage
             )).FirstOrDefaultAsync();
 

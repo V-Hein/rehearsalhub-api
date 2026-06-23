@@ -6,6 +6,6 @@ public record SongDto
     string Creator,
     string Tuning,
     string SongStatus,
-    TimeSpan Time,
+    int? TimeSeconds,
     string? CoverImagePath
 );

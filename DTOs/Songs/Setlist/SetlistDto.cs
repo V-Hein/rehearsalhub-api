@@ -4,5 +4,6 @@ public record SetlistDto
     string Name,
     string Band,
     int SongQuantity,
-    TimeSpan? Time
+    int TotalTimeSeconds,
+    List<SongListItemDto> Songs
 );

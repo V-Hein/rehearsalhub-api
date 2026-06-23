@@ -13,6 +13,7 @@ public class AppDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<Tuning> Tunings => Set<Tuning>();
     public DbSet<SongStatus> SongStatuses => Set<SongStatus>();
+    public DbSet<SetlistSong> SetlistSongs => Set<SetlistSong>();
     public DbSet<Song> Songs => Set<Song>();
     public DbSet<InstrumentType> InstrumentTypes => Set<InstrumentType>();
     public DbSet<Instrument> Instruments => Set<Instrument>();

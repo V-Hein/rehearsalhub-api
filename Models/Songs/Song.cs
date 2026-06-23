@@ -19,4 +19,5 @@ public class Song
     public string? CoverImage { get; set; }
     
     public List<Tab> Tabs { get; set; } = new();
+    public List<SetlistSong> SetlistSongs { get; set; } = new();
 }
