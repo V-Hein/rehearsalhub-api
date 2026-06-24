@@ -20,9 +20,9 @@ public class BandMemberConfiguration : IEntityTypeConfiguration<BandMember>
             .OnDelete(DeleteBehavior.Cascade);
 
         builder
-            .HasOne(bm => bm.Role)
+            .HasOne(bm => bm.BandRole)
             .WithMany(r => r.BandMembers)
-            .HasForeignKey(bm => bm.RoleId)
+            .HasForeignKey(bm => bm.BandRoleId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder
