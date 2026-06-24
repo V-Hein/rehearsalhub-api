@@ -7,8 +7,8 @@ public class BandMember
     public int UserId { get; set; }
     public User User { get; set; } = null!;
 
-    public int RoleId { get; set; }
-    public Role Role { get; set; } = null!;
+    public int BandRoleId { get; set; }
+    public BandRole BandRole { get; set; } = null!;
 
     public List<RehearsalMember> RehearsalMembers { get; set; } = new();
 }

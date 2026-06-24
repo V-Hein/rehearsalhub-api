@@ -1,4 +1,4 @@
-public record RoleDto
+public record BandRoleDto
 (
     int Id,
     string Name
