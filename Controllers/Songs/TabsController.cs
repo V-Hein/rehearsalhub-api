@@ -1,15 +1,20 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
 [Route("api/songs/{songId:int}/tabs")]
+[Authorize]
 public class TabsController : ControllerBase
 {
     private readonly AppDbContext _db;
+    private readonly IUserContext _user;
+    private int UserId => _user.UserId;
 
-    public TabsController(AppDbContext db)
+    public TabsController(AppDbContext db, IUserContext user)
     {
         _db = db;
+        _user = user;
     }
 
     [HttpGet]
@@ -23,57 +28,22 @@ public class TabsController : ControllerBase
     public async Task<ActionResult<Tab>> GetById(int id)
     {
         var tab = await GetTab(id);
-
-        if (tab == null)
-            return NotFound();
-
-        return Ok(tab);
+        return tab == null ? NotFound() : Ok(tab);
     }
 
     [HttpPost]
     public async Task<ActionResult<Tab>> Create(int songId, CreateTabDto dto)
     {
-        var hasTunings = await _db.InstrumentTunings
-            .AnyAsync(it => it.InstrumentId == dto.InstrumentId);
-
-        int? tuningId = null;
-
-        if (hasTunings)
-        {
-            tuningId = dto.TuningId
-                ?? await _db.Songs
-                    .Where(s => s.Id == songId)
-                    .Select(s => s.TuningId)
-                    .FirstOrDefaultAsync();
-
-            if (tuningId == null)
-                return BadRequest(new { error = "Tuning is required for this instrument." });
-
-            var validTuning = await _db.InstrumentTunings
-                .AnyAsync(it => 
-                    it.InstrumentId == dto.InstrumentId && 
-                    it.TuningId == tuningId);
-
-            if (!validTuning)
-                return BadRequest(new { error = "Invalid tuning for instrument." });
-        } 
-        
-        else if (dto.TuningId.HasValue)
-        {
-            return BadRequest(new { error = "This instrument does not support tunings." });
-        }
-
         var tab = new Tab
         {
             Name = dto.Name,
             SongId = songId,
             InstrumentId = dto.InstrumentId,
             Url = dto.Url,
-            TuningId = tuningId
+            TuningId = dto.TuningId
         };
 
         _db.Tabs.Add(tab);
-
         await _db.SaveChangesAsync();
 
         var result = await GetTab(tab.Id);
@@ -81,19 +51,14 @@ public class TabsController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { songId = tab.SongId, id = tab.Id }, result);
     }
 
-    private async Task<List<TabDto>> GetTabs()
-    {
-        return await ToDto(BaseQuery()).ToListAsync();
-    }
+    private async Task<List<TabDto>> GetTabs() =>
+        await ToDto(BaseQuery()).ToListAsync();
 
-    private async Task<TabDto?> GetTab(int id)
-    {
-        return await ToDto(BaseQuery().Where(t => t.Id == id)).FirstOrDefaultAsync();
-    }
+    private async Task<TabDto?> GetTab(int id) =>
+        await ToDto(BaseQuery().Where(t => t.Id == id)).FirstOrDefaultAsync();
 
-    private IQueryable<TabDto> ToDto(IQueryable<Tab> query)
-    {
-        return query
+    private IQueryable<TabDto> ToDto(IQueryable<Tab> query) =>
+        query
             .OrderBy(t => t.Id)
             .Select(t => new TabDto(
                 t.Id,
@@ -104,10 +69,9 @@ public class TabsController : ControllerBase
                 t.Tuning == null ? null : t.Tuning.Name,
                 t.Url
             ));
-    }
 
-    private IQueryable<Tab> BaseQuery()
-    {
-        return _db.Tabs;
-    }
+    private IQueryable<Tab> BaseQuery() => 
+        _db.Tabs
+            .Where(t => t.Song.Band.BandMembers.Any(m => m.UserId == UserId))
+            .AsNoTracking();
 }

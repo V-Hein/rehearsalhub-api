@@ -1,37 +1,31 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
 [Route("api/instruments/{instrumentId}/tunings")]
+[Authorize]
 public class InstrumentTuningsController : ControllerBase
 {
     private readonly AppDbContext _db;
-
-    public InstrumentTuningsController(AppDbContext db)
-    {
-        _db = db;
-    }
-
+    public InstrumentTuningsController(AppDbContext db) => _db = db;
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<InstrumentTuning>>> GetAll(int instrumentId)
+    public async Task<ActionResult<IEnumerable<InstrumentTuningDto>>> GetAll(int instrumentId)
     {
-        return Ok(await GetInstrumentTunings(instrumentId));
+        var instrumentTunings = await GetInstrumentTunings(instrumentId);
+        return Ok(instrumentTunings);
     }
 
     [HttpGet("{tuningId}")]
-    public async Task<ActionResult<InstrumentTuning>> GetById(int instrumentId, int tuningId)
+    public async Task<ActionResult<InstrumentTuningDto>> GetById(int instrumentId, int tuningId)
     {
         var instrumentTuning = await GetInstrumentTuning(instrumentId, tuningId);
-
-        if (instrumentTuning == null)
-            return NotFound();
-
-        return Ok(instrumentTuning);
+        return instrumentTuning == null ? NotFound() : Ok(instrumentTuning);
     }
 
     [HttpPost]
-    public async Task<ActionResult<InstrumentTuning>> Create(int instrumentId, CreateInstrumentTuningDto dto)
+    public async Task<ActionResult<InstrumentTuningDto>> Create(int instrumentId, CreateInstrumentTuningDto dto)
     {
         var instrumentTuning = new InstrumentTuning
         {
@@ -40,7 +34,6 @@ public class InstrumentTuningsController : ControllerBase
         };
 
         _db.InstrumentTunings.Add(instrumentTuning);
-
         await _db.SaveChangesAsync();
 
         var result = await GetInstrumentTuning(instrumentId, dto.TuningId);
@@ -55,28 +48,17 @@ public class InstrumentTuningsController : ControllerBase
             result
         );
     }
-    
 
+    private async Task<List<InstrumentTuningDto>> GetInstrumentTunings(int instrumentId) =>
+        await ToDto(BaseQuery(instrumentId)).ToListAsync();
 
-    private async Task<List<InstrumentTuningDto>> GetInstrumentTunings(int instrumentId)
-    {
-        return await ToDto(BaseQuery()
-            .Where(it => it.InstrumentId == instrumentId))
-            .ToListAsync();
-    }
-
-    private async Task<InstrumentTuningDto?> GetInstrumentTuning(int instrumentId, int tuningId)
-    {
-        return await ToDto(BaseQuery()
-            .Where(it => 
-                it.InstrumentId == instrumentId && 
-                it.TuningId == tuningId))
+    private async Task<InstrumentTuningDto?> GetInstrumentTuning(int instrumentId, int tuningId) =>
+        await ToDto(BaseQuery(instrumentId)
+            .Where(it => it.TuningId == tuningId))
             .FirstOrDefaultAsync();
-    }
     
-    private IQueryable<InstrumentTuningDto> ToDto(IQueryable<InstrumentTuning> query)
-    {
-        return query
+    private IQueryable<InstrumentTuningDto> ToDto(IQueryable<InstrumentTuning> query) =>
+        query
             .OrderBy(it => it.InstrumentId)
             .Select(it => new InstrumentTuningDto(
                 it.InstrumentId,
@@ -84,10 +66,9 @@ public class InstrumentTuningsController : ControllerBase
                 it.TuningId,
                 it.Tuning.Name
             ));
-    }
 
-    private IQueryable<InstrumentTuning> BaseQuery()
-    {
-        return _db.InstrumentTunings.AsNoTracking();
-    }
+    private IQueryable<InstrumentTuning> BaseQuery(int instrumentId) => 
+        _db.InstrumentTunings
+            .Where(it => it.InstrumentId == instrumentId)
+            .AsNoTracking();
 }

@@ -1,29 +1,40 @@
 
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 [ApiController]
 [Route("api/setlists")]
+[Authorize]
 public class SetlistsController : ControllerBase
 {
     private readonly AppDbContext _db;
-    public SetlistsController(AppDbContext db) => _db = db;
+    private readonly IUserContext _user;
+    private int UserId => _user.UserId;
 
+    public SetlistsController(AppDbContext db, IUserContext user)
+    {
+        _db = db;
+        _user = user;
+    }    
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Setlist>>> GetAll() =>
-        Ok(await GetSetlists());
+    public async Task<ActionResult<IEnumerable<SetlistDto>>> GetAll()
+    {
+        var setlists = await GetSetlists();
+        return Ok(setlists);
+    }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Setlist>> GetById(int id)
+    public async Task<ActionResult<SetlistDto>> GetById(int id)
     {
         var setlist = await GetSetlist(id);
         return setlist == null ? NotFound() : Ok(setlist);
     }
 
     [HttpPost]
-    public async Task<ActionResult<Setlist>> Create(CreateSetlistDto dto)
+    public async Task<ActionResult<SetlistDto>> Create(CreateSetlistDto dto)
     {
         var setlist = new Setlist
         {
@@ -40,7 +51,6 @@ public class SetlistsController : ControllerBase
         }
 
         _db.Setlists.Add(setlist);
-
         await _db.SaveChangesAsync();
 
         var result = await GetSetlists();
@@ -71,5 +81,8 @@ public class SetlistsController : ControllerBase
                         ss.Song.TimeSeconds
                     )).ToList()
             ));
-    private IQueryable<Setlist> BaseQuery() => _db.Setlists.AsNoTracking();
+    private IQueryable<Setlist> BaseQuery() => 
+        _db.Setlists
+            .Where(s => s.Band.BandMembers.Any(m => m.UserId == UserId))
+            .AsNoTracking();
 }

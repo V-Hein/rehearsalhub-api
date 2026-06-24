@@ -1,17 +1,22 @@
 using System.Collections;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
 [Route("api/ratings")]
+[Authorize]
 public class RatingsController : ControllerBase
 {
     private readonly AppDbContext _db;
     public RatingsController(AppDbContext db) =>_db = db;
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Rating>>> GetAll() =>
-        Ok(await GetRatings());
+    public async Task<ActionResult<IEnumerable<Rating>>> GetAll()
+    {
+        var ratings = await GetRatings();
+        return Ok(ratings);
+    }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<Rating>> GetById(int id)
@@ -28,9 +33,10 @@ public class RatingsController : ControllerBase
         _db.Ratings.Add(rating);
         await _db.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetById), new { id = rating.Id}, await GetRating(rating.Id));
-    }
+        var result = await GetRating(rating.Id);
 
+        return CreatedAtAction(nameof(GetById), new { id = rating.Id}, result);
+    }
 
     private async Task<List<RatingDto>> GetRatings() =>
         await ToDto(BaseQuery()).ToListAsync();

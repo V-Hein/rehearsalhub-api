@@ -1,4 +1,3 @@
-
 public record UserDto
 (
     int Id,

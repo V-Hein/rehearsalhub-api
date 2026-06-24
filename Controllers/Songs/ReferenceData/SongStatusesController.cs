@@ -1,24 +1,26 @@
 using System.Collections;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
+using Microsoft.AspNetCore.Authorization;
+using System.Runtime.CompilerServices;
+using Server.Migrations;
 [ApiController]
 [Route("api/song_statuses")]
+[Authorize]
 public class SongStatusesController : ControllerBase
 {
     private readonly AppDbContext _db;
-    
-    public SongStatusesController(AppDbContext db)
-    {
-        _db = db;
-    }
+    public SongStatusesController(AppDbContext db) => _db = db;
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<SongStatus>>> GetAll() =>
-        Ok(await GetStatuses());
+    public async Task<ActionResult<IEnumerable<SongStatusDto>>> GetAll()
+    {
+        var songStatuses = await GetStatuses();
+        return Ok(songStatuses);
+    }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<SongStatus>> GetById(int id)
+    public async Task<ActionResult<SongStatusDto>> GetById(int id)
     {
         var status = await GetStatus(id);
         return status == null ? NotFound() : Ok(status);
@@ -32,9 +34,10 @@ public class SongStatusesController : ControllerBase
         _db.SongStatuses.Add(status);
         await _db.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetById), new { id = status.Id}, await GetStatus(status.Id));
-    }
+        var result = await GetStatus(status.Id);
 
+        return CreatedAtAction(nameof(GetById), new { id = status.Id}, result);
+    }
 
     private async Task<List<SongStatusDto>> GetStatuses() =>
         await ToDto(BaseQuery()).ToListAsync();

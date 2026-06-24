@@ -1,16 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
+using Microsoft.AspNetCore.Authorization;
 [ApiController]
 [Route("api/rehearsals/{rehearsalId:int}/members")]
+[Authorize]
 public class RehearsalMembersController : ControllerBase
 {
     private readonly AppDbContext _db;
-
-    public RehearsalMembersController(AppDbContext db)
-    {
-        _db = db;
-    }
+    public RehearsalMembersController(AppDbContext db) => _db = db;
 
     // Http-Endpoints
 
@@ -18,7 +16,6 @@ public class RehearsalMembersController : ControllerBase
     public async Task<ActionResult<IEnumerable<RehearsalMember>>> GetAll(int rehearsalId)
     {
         var members = await GetMembers(rehearsalId);
-
         return Ok(members);
     }
     
@@ -26,11 +23,7 @@ public class RehearsalMembersController : ControllerBase
     public async Task<ActionResult<RehearsalMember>> GetById(int rehearsalId, int bandMemberId)
     {
         var member = await GetMember(rehearsalId, bandMemberId);
-
-        if (member == null)
-            return NotFound();
-
-        return Ok(member);
+        return member == null ? NotFound() :  Ok(member);
     }
 
     [HttpPost]
@@ -54,34 +47,25 @@ public class RehearsalMembersController : ControllerBase
 
     // Inner-Methods
 
-    private async Task<List<RehearsalMemberDto>> GetMembers(int rehearsalId)
-    {
-        return await ToDto(BaseQuery()
-            .Where(rm => rm.RehearsalId == rehearsalId))
-            .ToListAsync();
-    }
+    private async Task<List<RehearsalMemberDto>> GetMembers(int rehearsalId) =>
+        await ToDto(BaseQuery(rehearsalId)).ToListAsync();
 
-    private async Task<RehearsalMemberDto?> GetMember(int rehearsalId, int bandMemberId)
-    {
-        return await ToDto(BaseQuery()
-        .Where(rm => rm.RehearsalId == rehearsalId && rm.BandMemberId == bandMemberId))
-        .FirstOrDefaultAsync();
-    }
+    private async Task<RehearsalMemberDto?> GetMember(int rehearsalId, int bandMemberId) =>
+         await ToDto(BaseQuery(rehearsalId)
+            .Where(rm => rm.BandMemberId == bandMemberId))
+            .FirstOrDefaultAsync();
 
-    private IQueryable<RehearsalMemberDto> ToDto(IQueryable<RehearsalMember> query)
-    {
-        return query
+    private IQueryable<RehearsalMemberDto> ToDto(IQueryable<RehearsalMember> query) =>
+        query
             .OrderBy(rm => rm.RehearsalId)
             .Select(rm => new RehearsalMemberDto(
-            rm.BandMember.Id,
-            rm.BandMember.User.FirstName + rm.BandMember.User.LastName,
-            rm.RehearsalMemberStatus.Name
+                rm.BandMember.Id,
+                rm.BandMember.User.FirstName + rm.BandMember.User.LastName,
+                rm.RehearsalMemberStatus.Name
         ));
-    }
 
-    private IQueryable<RehearsalMember> BaseQuery()
-    {
-        return _db.RehearsalMembers;
-    }
-
+    private IQueryable<RehearsalMember> BaseQuery(int rehearsalId) => 
+        _db.RehearsalMembers
+            .Where(rm => rm.RehearsalId == rehearsalId)
+            .AsNoTracking();
 }

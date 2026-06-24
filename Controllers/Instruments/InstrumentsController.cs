@@ -2,57 +2,28 @@
 using System.Runtime.InteropServices.Marshalling;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
 [Route("api/instruments")]
+[Authorize]
 public class InstrumentsController : ControllerBase
 {
     private readonly AppDbContext _db;
-
-    public InstrumentsController(AppDbContext db)
-    {
-        _db = db;
-    }
+    public InstrumentsController(AppDbContext db) => _db = db;
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Instrument>>> GetAll()
+    public async Task<ActionResult<IEnumerable<InstrumentDto>>> GetAll()
     {
-        var instruments = await _db.Instruments
-            .Include(i => i.InstrumentType)
-            .Select(i => new InstrumentDto(
-                i.Id,
-                i.Name,
-                new InstrumentTypeDto(
-                    i.InstrumentType.Id,
-                    i.InstrumentType.Name
-                )
-            )).ToListAsync();
-
-        if (instruments == null)
-            return NotFound();
-
+        var instruments = await GetInstruments();
         return Ok(instruments);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Instrument>> GetById(int id)
+    public async Task<ActionResult<InstrumentDto>> GetById(int id)
     {
-        var instrument = await _db.Instruments
-            .Where(i => i.Id == id)
-            .Include(i => i.InstrumentType)
-            .Select(i => new InstrumentDto(
-                i.Id,
-                i.Name,
-                new InstrumentTypeDto(
-                    i.InstrumentType.Id,
-                    i.InstrumentType.Name
-                )
-            )).FirstOrDefaultAsync();
-
-        if (instrument == null)
-            return NotFound();
-
-        return Ok(instrument);
+        var instrument = await GetInstrument(id);
+        return instrument == null ? NotFound() : Ok(instrument);
     }
 
     [HttpPost]
@@ -67,18 +38,27 @@ public class InstrumentsController : ControllerBase
         _db.Instruments.Add(instrument);
         await _db.SaveChangesAsync();
 
-        var result = await _db.Instruments
-            .Where(i => i.Id == instrument.Id)
-            .Include(i => i.InstrumentType)
+        var result = await GetInstrument(instrument.Id);
+
+        return CreatedAtAction(nameof(GetById), new { id = instrument.Id }, result);
+    }
+
+    private async Task<List<InstrumentDto>> GetInstruments() =>
+        await ToDto(BaseQuery()).ToListAsync();
+
+    private async Task<InstrumentDto?> GetInstrument(int id) =>
+        await ToDto(BaseQuery().Where(i => i.Id == id)).FirstOrDefaultAsync();
+
+    private IQueryable<InstrumentDto> ToDto(IQueryable<Instrument> query) =>
+        query
+            .OrderBy(i => i.Id)
             .Select(i => new InstrumentDto(
                 i.Id,
                 i.Name,
                 new InstrumentTypeDto(
                     i.InstrumentType.Id,
-                    i.InstrumentType.Name
-                )
-            )).FirstOrDefaultAsync();
+                    i.InstrumentType.Name)
+            ));
 
-        return CreatedAtAction(nameof(GetById), new { id = result!.Id }, result);
-    }
+    private IQueryable<Instrument> BaseQuery() => _db.Instruments.AsNoTracking();
 }

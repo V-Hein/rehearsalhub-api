@@ -1,21 +1,23 @@
 using System.Collections;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.StaticAssets;
 
 [ApiController]
 [Route("api/rehearsal_statuses")]
+[Authorize]
 public class RehearsalStatusesController : ControllerBase
 {
     private readonly AppDbContext _db;
-    
-    public RehearsalStatusesController(AppDbContext db)
-    {
-        _db = db;
-    }
+    public RehearsalStatusesController(AppDbContext db) => _db = db;
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<RehearsalStatusDto>>> GetAll() =>
-        Ok(await GetStatuses());
+    public async Task<ActionResult<IEnumerable<RehearsalStatusDto>>> GetAll()
+    {
+        var statuses = await GetStatuses();
+        return Ok(statuses);
+    }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<RehearsalStatusDto>> GetById(int id)
@@ -32,18 +34,18 @@ public class RehearsalStatusesController : ControllerBase
         _db.RehearsalStatuses.Add(status);
         await _db.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetById), new { id = status.Id}, await GetStatus(status.Id));
+        var result = await GetStatus(status.Id);
+
+        return CreatedAtAction(nameof(GetById), new { id = status.Id}, result);
     }
-
-
 
     private async Task<List<RehearsalStatusDto>> GetStatuses() =>
         await ToDto(BaseQuery()).ToListAsync();
     private async Task<RehearsalStatusDto?> GetStatus(int id) => 
         await ToDto(BaseQuery().Where(rs => rs.Id == id)).FirstOrDefaultAsync();
 
-    private IQueryable<RehearsalStatusDto> ToDto(IQueryable<RehearsalStatus> query) =>
-        query
+    private IQueryable<RehearsalStatusDto> ToDto(IQueryable<RehearsalStatus> query) 
+        => query
             .OrderBy(rs => rs.Id)
             .Select(rs => new RehearsalStatusDto(
                 rs.Id,

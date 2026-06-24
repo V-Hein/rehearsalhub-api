@@ -1,17 +1,21 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
 [Route("api/rehearsals/{rehearsalId}/songs")]
+[Authorize]
 public class RehearsalSongsController : ControllerBase
 {
     private readonly AppDbContext _db;
     public RehearsalSongsController(AppDbContext db) => _db = db;
 
-
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<RehearsalSongDto>>> GetAll(int rehearsalId) =>
-        Ok(await GetRehearsalSongs(rehearsalId));
+    public async Task<ActionResult<IEnumerable<RehearsalSongDto>>> GetAll(int rehearsalId)
+    {
+        var rehearsalSongs = await GetRehearsalSongs(rehearsalId);
+        return Ok(rehearsalSongs);
+    }
 
     [HttpGet("{songId}")]
     public async Task<ActionResult<RehearsalSongDto>> GetById(int rehearsalId, int songId)
@@ -64,8 +68,9 @@ public class RehearsalSongsController : ControllerBase
                 rs.RatingId,
                 rs.Rating != null ? rs.Rating.Name : "Not Stated"
             ));
+
     private IQueryable<RehearsalSong> BaseQuery(int rehearsalId) =>
          _db.RehearsalSongs
-         .Where(rs => rs.RehearsalId == rehearsalId)
-         .AsNoTracking();
+            .Where(rs => rs.RehearsalId == rehearsalId)
+            .AsNoTracking();
 }

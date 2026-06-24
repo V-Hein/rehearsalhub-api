@@ -1,5 +1,6 @@
 
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ValueGeneration.Internal;
@@ -7,40 +8,35 @@ using Server.Migrations;
 
 [ApiController]
 [Route("api/rehearsals")]
+[Authorize]
 public class RehearsalsController : ControllerBase
 {
     private readonly AppDbContext _db;
+    private readonly IUserContext _user;
+    private int UserId => _user.UserId;
 
-    public RehearsalsController(AppDbContext db)
+    public RehearsalsController(AppDbContext db, IUserContext user)
     {
         _db = db;
+        _user = user;
     }
 
-
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Rehearsal>>> GetAll()
+    public async Task<ActionResult<IEnumerable<RehearsalDto>>> GetAll()
     {
         var rehearsals = await GetRehearsals();
-
-        if (rehearsals == null)
-            return NotFound();
-
         return Ok(rehearsals);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Rehearsal>> GetById(int id)
+    public async Task<ActionResult<RehearsalDto>> GetById(int id)
     {
         var rehearsal = await GetRehearsal(id);
-
-        if (rehearsal == null)
-            return NotFound();
-
-        return Ok(rehearsal);
+        return rehearsal == null ? NotFound() : Ok(rehearsal);
     }
 
     [HttpPost]
-    public async Task<ActionResult<Rehearsal>> Create(CreateRehearsalDto dto)
+    public async Task<ActionResult<RehearsalDto>> Create(CreateRehearsalDto dto)
     {
         var rehearsal = new Rehearsal
         {
@@ -60,13 +56,11 @@ public class RehearsalsController : ControllerBase
             .ToListAsync();
         
         foreach (var songId in songIds)
-        {
             rehearsal.RehearsalSongs.Add(new RehearsalSong
             {
                 RehearsalId = rehearsal.Id,
                 SongId = songId
             });
-        }
 
         _db.Rehearsals.Add(rehearsal);
         await _db.SaveChangesAsync();
@@ -76,9 +70,16 @@ public class RehearsalsController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = rehearsal.Id }, result);
     }
 
-    private IQueryable<RehearsalDto> ToDto(IQueryable<Rehearsal> query)
-    {
-        return query.Select(r => new RehearsalDto(
+    private async Task<List<RehearsalDto>> GetRehearsals() =>
+        await ToDto(BaseQuery()).ToListAsync();
+
+    private async Task<RehearsalDto?> GetRehearsal(int id) =>
+        await ToDto(BaseQuery().Where(r => r.Id == id)).FirstOrDefaultAsync();
+
+    private IQueryable<RehearsalDto> ToDto(IQueryable<Rehearsal> query) =>
+        query
+            .OrderBy(r => r.Id)
+            .Select(r => new RehearsalDto(
                 r.Id,
                 r.Name,
                 r.Band.Name,
@@ -89,6 +90,7 @@ public class RehearsalsController : ControllerBase
                 r.TimeSeconds ?? 0,
                 r.Note,
                 r.RehearsalSongs
+                    .OrderBy(rs => rs.SongId)
                     .Select(rs => new RehearsalSongListItemDto(
                         rs.Song.Id,
                         rs.Song.Name,
@@ -96,20 +98,9 @@ public class RehearsalsController : ControllerBase
                         rs.Rating != null ? rs.Rating.Name : "Not Stated"
                     )).ToList()
             ));
-    }
 
-    private IQueryable<Rehearsal> BaseQuery()
-    {
-        return _db.Rehearsals;
-    }
-
-    private async Task<List<RehearsalDto>> GetRehearsals()
-    {
-        return await ToDto(BaseQuery()).ToListAsync();
-    }
-
-    private async Task<RehearsalDto?> GetRehearsal(int id)
-    {
-        return await ToDto(BaseQuery().Where(r => r.Id == id)).FirstOrDefaultAsync();
-    }
+    private IQueryable<Rehearsal> BaseQuery() =>
+        _db.Rehearsals
+            .Where(r => r.Band.BandMembers.Any(m => m.UserId == UserId))
+            .AsNoTracking();
 }
