@@ -9,6 +9,7 @@ public class AppDbContext : DbContext
 
     // Users
     public DbSet<User> Users => Set<User>();
+    public DbSet<Role> Roles => Set<Role>();
 
     // Bands
     public DbSet<Band> Bands => Set<Band>();
