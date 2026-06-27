@@ -19,7 +19,8 @@ public class AuthService : IAuthService
     public async Task<AuthResponseDto?> Login(LoginDto dto)
     {
         var user = await _db.Users
-            .FirstOrDefaultAsync(x => x.Email == dto.Email);
+            .Include(u => u.Role)
+            .FirstOrDefaultAsync(u => u.Email == dto.Email);
         
         if (user == null)
             return null;
