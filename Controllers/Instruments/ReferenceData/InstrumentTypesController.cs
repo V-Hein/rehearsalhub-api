@@ -38,7 +38,7 @@ public class InstrumentTypesController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = type.Id }, result);
     }
 
-    public async Task<List<InstrumentTypeDto>> GetTypes() =>
+    private async Task<List<InstrumentTypeDto>> GetTypes() =>
         await ToDto(BaseQuery()).ToListAsync();
 
     private async Task<InstrumentTypeDto?> GetType(int id) =>

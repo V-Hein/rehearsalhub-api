@@ -3,6 +3,8 @@ public record BandMemberDto
     int Id,
     int BandId,
     int UserId,
-    string UserName,
-    string RoleName
+    int RoleId,
+    string Band,
+    string User,
+    string Role
 );

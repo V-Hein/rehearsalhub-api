@@ -72,6 +72,6 @@ public class TabsController : ControllerBase
 
     private IQueryable<Tab> BaseQuery() => 
         _db.Tabs
-            .Where(t => t.Song.Band.BandMembers.Any(m => m.UserId == UserId))
+            // .Where(t => t.Song.Band.BandMembers.Any(m => m.UserId == UserId))
             .AsNoTracking();
 }

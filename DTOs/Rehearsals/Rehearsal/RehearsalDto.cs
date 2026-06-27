@@ -4,10 +4,14 @@ public record RehearsalDto
 (
     int Id,
     string Name,
+    int BandId,
     string Band,
+    int SetlistId,
     string Setlist,
+    int PlaceId,
     string Place,
-    string RehearsalStatus,
+    int StatusId,
+    string Status,
     DateTime Date,
 
     int? TimeSeconds,

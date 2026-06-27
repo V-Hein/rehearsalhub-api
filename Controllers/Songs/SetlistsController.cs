@@ -58,6 +58,57 @@ public class SetlistsController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = setlist.Id }, result);
     }
 
+    [HttpPut("{id}")]
+    public async Task<ActionResult<SetlistDto>> Update(int id, CreateSetlistDto dto)
+    {
+        var setlist = await _db.Setlists
+            .Include(s => s.SetlistSongs)
+            .FirstOrDefaultAsync(s => s.Id == id);
+
+        if (setlist == null)
+            return NotFound();
+
+        setlist.Name = dto.Name;
+        setlist.BandId = dto.BandId;
+        setlist.SetlistSongs.Clear();
+        
+        foreach (var songId in dto.SongIds)
+            setlist.SetlistSongs.Add(new SetlistSong
+            {
+                SetlistId = setlist.Id,
+                SongId = songId
+            });
+
+        await _db.SaveChangesAsync();
+
+        return Ok(await GetSetlist(id));
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<ActionResult> Delete(int id)
+    {
+        if (usedInRehearsal(id))
+            return Problem(
+                detail: "Setlist cannot be deleted because it currently used in Rehearsal",
+                statusCode: StatusCodes.Status409Conflict,
+                title: "Resource Conflict"
+            );
+
+        var setlist = await _db.Setlists
+            .Include(s => s.SetlistSongs)
+            .FirstOrDefaultAsync(s => s.Id == id);
+        
+        if (setlist == null) 
+            return NotFound();
+
+        _db.SetlistSongs.RemoveRange(setlist.SetlistSongs);
+        _db.Setlists.Remove(setlist);
+
+        await _db.SaveChangesAsync();
+
+        return NoContent();
+    }
+
 
     private async Task<List<SetlistDto>> GetSetlists() =>
         await ToDto(BaseQuery()).ToListAsync();
@@ -71,7 +122,11 @@ public class SetlistsController : ControllerBase
             .Select(s => new SetlistDto(
                 s.Id,
                 s.Name,
+                s.Band.Id,
                 s.Band.Name,
+                s.SetlistSongs
+                    .Select(ss => ss.Song.Id)
+                    .ToList(),
                 s.SetlistSongs.Count(),
                 s.SetlistSongs.Sum(ss => ss.Song.TimeSeconds ?? 0),
                 s.SetlistSongs
@@ -83,6 +138,9 @@ public class SetlistsController : ControllerBase
             ));
     private IQueryable<Setlist> BaseQuery() => 
         _db.Setlists
-            .Where(s => s.Band.BandMembers.Any(m => m.UserId == UserId))
+            // .Where(s => s.Band.BandMembers.Any(m => m.UserId == UserId))
             .AsNoTracking();
+
+    private bool usedInRehearsal(int id) =>
+        _db.Rehearsals.Any(r => r.SetlistId == id);
 }

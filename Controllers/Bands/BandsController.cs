@@ -78,11 +78,60 @@ public class BandsController : ControllerBase
                 b.Id,
                 b.Name,
                 b.BandGenres
+                    .Select(bg => bg.Genre.Id)
+                    .ToList(),
+                b.BandGenres
                     .Select(bg => bg.Genre.Name)
                     .ToList()
             )).ToListAsync();
 
         return Created("", result);
+    }
+
+    [HttpPut("{id}")]
+    public async Task<ActionResult<BandDto>> Update(int id, CreateBandDto dto)
+    {
+        var band = await _db.Bands
+            .Include(b => b.BandGenres)
+            .FirstOrDefaultAsync(b => b.Id == id);
+
+        if (band == null)
+            return NotFound();
+
+        band.Name = dto.Name;
+        band.BandGenres.Clear();
+
+        foreach (var genreId in dto.GenreIds)
+            band.BandGenres.Add(new BandGenre
+            {
+                BandId = band.Id,
+                GenreId = genreId
+            });
+
+        await _db.SaveChangesAsync();
+
+        return Ok(await GetBand(id));
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<ActionResult> Delete(int id)
+    {
+        if (hasSongs(id)) 
+            return Problem(
+                detail: "Band cannot be deleted because it own songs.",
+                statusCode: StatusCodes.Status409Conflict,
+                title: "Resource Conflict"
+            );
+
+        var band = await _db.Bands.FindAsync(id);
+
+        if (band == null)
+            return NotFound();
+
+        _db.Bands.Remove(band);
+        await _db.SaveChangesAsync();
+
+        return NoContent();
     }
 
     private async Task<List<BandDto>> GetBands() =>
@@ -98,12 +147,18 @@ public class BandsController : ControllerBase
                 b.Id,
                 b.Name,
                 b.BandGenres
+                    .Select(bg => bg.Genre.Id)
+                    .ToList(),
+                b.BandGenres
                     .Select(bg => bg.Genre.Name)
                     .ToList()
             ));
 
     private IQueryable<Band> BaseQuery() => 
         _db.Bands
-            .Where(b => b.BandMembers.Any(m => m.UserId == UserId))
+            // .Where(b => b.BandMembers.Any(m => m.UserId == UserId))
             .AsNoTracking();
+
+    private bool hasSongs(int id) =>
+        _db.Songs.Any(s => s.BandId == id);
 }

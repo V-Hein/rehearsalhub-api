@@ -3,8 +3,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ValueGeneration.Internal;
-using Server.Migrations;
 
 [ApiController]
 [Route("api/rehearsals")]
@@ -70,6 +68,42 @@ public class RehearsalsController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = rehearsal.Id }, result);
     }
 
+    [HttpPut("{id}")]
+    public async Task<ActionResult<RehearsalDto>> Update(int id, CreateRehearsalDto dto)
+    {
+        var rehearsal = await _db.Rehearsals.FindAsync(id);
+
+        if (rehearsal == null)
+            return NotFound();
+
+        rehearsal.Name = dto.Name;
+        rehearsal.BandId = dto.BandId;
+        rehearsal.SetlistId = dto.SetlistId;
+        rehearsal.PlaceId = dto.PlaceId;
+        rehearsal.RehearsalStatusId = dto.StatusId;
+        rehearsal.Date = Convert.ToDateTime(dto.Date);
+        rehearsal.TimeSeconds = dto.TimeSeconds;
+        rehearsal.Note = dto.Note;
+
+        await _db.SaveChangesAsync();
+
+        return Ok(await GetRehearsal(id));
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<ActionResult> Delete(int id)
+    {
+        var rehearsal = await _db.Rehearsals.FindAsync(id);
+        
+        if (rehearsal == null) 
+            return NotFound();
+        
+        _db.Rehearsals.Remove(rehearsal);
+        await _db.SaveChangesAsync();
+
+        return NoContent();
+    }
+
     private async Task<List<RehearsalDto>> GetRehearsals() =>
         await ToDto(BaseQuery()).ToListAsync();
 
@@ -82,9 +116,13 @@ public class RehearsalsController : ControllerBase
             .Select(r => new RehearsalDto(
                 r.Id,
                 r.Name,
+                r.Band.Id,
                 r.Band.Name,
+                r.Setlist.Id,
                 r.Setlist.Name,
+                r.Place.Id,
                 r.Place.Name,
+                r.RehearsalStatus.Id,
                 r.RehearsalStatus.Name,
                 r.Date,
                 r.TimeSeconds ?? 0,
@@ -101,6 +139,6 @@ public class RehearsalsController : ControllerBase
 
     private IQueryable<Rehearsal> BaseQuery() =>
         _db.Rehearsals
-            .Where(r => r.Band.BandMembers.Any(m => m.UserId == UserId))
+            // .Where(r => r.Band.BandMembers.Any(m => m.UserId == UserId))
             .AsNoTracking();
 }

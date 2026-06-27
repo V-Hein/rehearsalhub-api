@@ -55,7 +55,9 @@ public class BandMembersController : ControllerBase
             .Select(m => new BandMemberDto(
                 m.Id,
                 m.BandId,
-                m.UserId,
+                m.User.Id,
+                m.BandRoleId,
+                m.Band.Name,
                 m.User.FirstName + " " + m.User.LastName,
                 m.BandRole.Name
             ));
