@@ -93,12 +93,16 @@ public class RehearsalsController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<ActionResult> Delete(int id)
     {
-        var rehearsal = await _db.Rehearsals.FindAsync(id);
+        var rehearsal = await _db.Rehearsals
+            .Include(r => r.RehearsalSongs)
+            .FirstOrDefaultAsync(r => r.Id == id);
         
         if (rehearsal == null) 
             return NotFound();
-        
+
+        _db.RehearsalSongs.RemoveRange(rehearsal.RehearsalSongs);
         _db.Rehearsals.Remove(rehearsal);
+        
         await _db.SaveChangesAsync();
 
         return NoContent();
